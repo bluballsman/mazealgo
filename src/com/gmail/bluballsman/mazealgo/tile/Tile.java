@@ -12,23 +12,20 @@ public class Tile {
 	public Tile(boolean isGround, boolean[] surroundingTiles) {
 		int surroundingTileBits = 0;
 		int rotations = 0;
-		Type type = null;
 		
 		for(int i = 0; i < 4; i++) {
-			surroundingTileBits += isGround == surroundingTiles[i] ? 1 : 0;
 			surroundingTileBits = surroundingTileBits << 1;
+			surroundingTileBits += isGround == surroundingTiles[i] ? 1 : 0;
 		}
 		
-		surroundingTileBits = surroundingTileBits + (surroundingTileBits << 4);
-		
-		while(type == null) {
-			type = Type.getType(surroundingTileBits);
-			surroundingTileBits = surroundingTileBits >> 0;
+		surroundingTileBits = surroundingTileBits | (surroundingTileBits << 4);
+		while(Type.getType(surroundingTileBits) == null) {
+			surroundingTileBits = surroundingTileBits >> 1;
 			rotations++;
 		}
 		
 		this.isGround = isGround;
-		this.type = type;
+		this.type = Type.getType(surroundingTileBits);
 		this.rotations = rotations;
 	}
 	
@@ -45,10 +42,10 @@ public class Tile {
 	}
 	
 	public static enum Type {
-		T(0b0001),
+		T(0b0111),
 		CORNER(0b0011),
 		STRAIGHT(0b0101),
-		END(0b0111),
+		END(0b0001),
 		CROSS(0b1111),
 		ALONE(0b0000);
 		

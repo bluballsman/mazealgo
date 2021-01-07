@@ -15,7 +15,9 @@ public class Maze {
 	private Random random = new Random();
 	
 	public Maze(int length, int width) {
-	   tiles = new boolean[length][width];
+	   this.length = length;
+	   this.width = width;
+		tiles = new boolean[length][width];
 		for(int y = 0; y < width; y++) {
 			for(int x = 0; x < length; x++) {
 				tiles[x][y] = false;
@@ -23,8 +25,16 @@ public class Maze {
 		}
 	}
 	
+	public int getLength() {
+		return length;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
 	public boolean isGround(int x, int y) {
-		return x < 0 || x > length || y < 0 || y > width || tiles[x][y];
+		return x < 0 || x >= length || y < 0 || y >= width || tiles[x][y];
 	}
 	
 	public boolean isGround(Point p) {

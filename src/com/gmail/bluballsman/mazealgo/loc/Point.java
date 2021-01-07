@@ -27,6 +27,10 @@ public class Point {
 		return this;
 	}
 	
+	public Point getInverse(int xLim, int yLim) {
+		return new Point(xLim - x - 1, yLim - y - 1);
+	}
+	
 	public Point translate(Direction d) {
 		return translate(d.X_OFFSET, d.Y_OFFSET);
 	}
