@@ -4,12 +4,11 @@ import java.util.HashMap;
 
 public class Tile {
 	private boolean isGround = false;
+	private boolean isStructure = false;
 	private Type type = null;
 	private int rotations = 0;
 	
-	public Tile() {}
-
-	public Tile(boolean isGround, boolean[] surroundingTiles) {
+	public Tile(boolean isGround, boolean isStructure, boolean[] surroundingTiles) {
 		int surroundingTileBits = 0;
 		int rotations = 0;
 		
@@ -25,12 +24,17 @@ public class Tile {
 		}
 		
 		this.isGround = isGround;
+		this.isStructure = isStructure;
 		this.type = Type.getType(surroundingTileBits);
 		this.rotations = rotations;
 	}
 	
 	public boolean isGround() {
 		return isGround;
+	}
+	
+	public boolean isStructure() {
+		return isStructure;
 	}
 		
 	public Type getType() {

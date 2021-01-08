@@ -7,7 +7,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import com.gmail.bluballsman.mazealgo.tile.Tile;
-import com.gmail.bluballsman.mazealgo.tile.Tile.Type;
 
 public class MazeCanvas extends Canvas {
 	private static final long serialVersionUID = 1L;
@@ -27,28 +26,15 @@ public class MazeCanvas extends Canvas {
 	
 	@Override
 	public void paint(Graphics g) {
-		for(int y = 0; y < maze.getWidth(); y++) {
-			for(int x = 0; x < maze.getLength(); x++) {
+		for(int y = 0; y < maze.getHeight(); y++) {
+			for(int x = 0; x < maze.getWidth(); x++) {
 				int paintX = tileSizePixels * x;
 				int paintY = tileSizePixels * y;
 				Tile t = maze.getTile(x, y);
 				Color color = t.isGround() ? new Color(255, 255, 255) : new Color(0, 0, 0);
 				
-				if(t.getType() == Type.STRAIGHT && !t.isGround()) {
-					switch(t.getRotations()) {
-					case 0:
-						color = new Color(0, 0, 123);
-						break;
-					case 1:
-						color = new Color(0, 123, 0);
-						break;
-					case 2:
-						color = new Color(123, 0, 0);
-						break;
-					default:
-						color = new Color(123, 123, 123);
-						break;
-					}
+				if(t.isStructure()) {
+					color = new Color(123, 123, 123);
 				}
 				
 				g.setColor(color);
@@ -68,8 +54,9 @@ public class MazeCanvas extends Canvas {
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			maze = new Maze(maze.getLength(), maze.getWidth());
+			maze = new Maze(maze.getWidth(), maze.getHeight());
 			maze.fillMaze();
+			maze.test();
 			repaint();
 		}
 
