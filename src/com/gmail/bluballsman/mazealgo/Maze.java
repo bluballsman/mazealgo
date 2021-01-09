@@ -12,13 +12,13 @@ import com.gmail.bluballsman.mazealgo.structure.StructureBlueprint;
 import com.gmail.bluballsman.mazealgo.tile.Tile;
 
 public class Maze {
-	private final int width;
-	private final int height;
+	private int width;
+	private int height;
 	private int centerRadius;
-	private final boolean[][] walls;
-	private final boolean[][] structureFlags;
-	private final HashMap<Point, StructureBlueprint> structures = new HashMap<Point, StructureBlueprint>();
-	private final Random random = new Random();
+	private boolean[][] walls;
+	private boolean[][] structureFlags;
+	private HashMap<Point, StructureBlueprint> structures = new HashMap<Point, StructureBlueprint>();
+	private Random random = new Random();
 	
 	public Maze(int width, int height, int centerRadius) {
 	   this.width = width;

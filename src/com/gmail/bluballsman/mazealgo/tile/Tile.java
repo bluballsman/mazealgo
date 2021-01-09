@@ -9,6 +9,12 @@ public class Tile {
 	private int rotations = 0;
 	
 	public Tile(boolean isGround, boolean structureFlag, boolean[] surroundingTiles) {
+		this.isGround = isGround;
+		this.structureFlag = structureFlag;
+		initializeRotationAndType(surroundingTiles);
+	}
+	
+	private void initializeRotationAndType(boolean[] surroundingTiles) {
 		int surroundingTileBits = 0;
 		int rotations = 0;
 		
@@ -23,8 +29,6 @@ public class Tile {
 			rotations++;
 		}
 		
-		this.isGround = isGround;
-		this.structureFlag = structureFlag;
 		this.type = Type.getType(surroundingTileBits);
 		this.rotations = rotations;
 	}
