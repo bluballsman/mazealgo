@@ -1,7 +1,7 @@
 package com.gmail.bluballsman.mazealgo.structure;
 
 public class StructureBlueprint {
-	private boolean[][] blueprint;
+	private boolean[][] pattern;
 	private int width = 0;
 	private int height = 0;
 	private int rotations = 0;
@@ -10,11 +10,11 @@ public class StructureBlueprint {
 		String[] blueprintString = strucString.split("[.]");
 		width = blueprintString[0].length();
 		height = blueprintString.length;
-		blueprint = new boolean[width][height];
+		pattern = new boolean[width][height];
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				blueprint[x][y] = blueprintString[y].charAt(x) == '1';
+				pattern[x][y] = blueprintString[y].charAt(x) == '1';
 			}
 		}
 	}
@@ -23,11 +23,11 @@ public class StructureBlueprint {
 		width = s.getWidth();
 		height = s.getHeight();
 		rotations = s.getRotations();
-		blueprint = new boolean[width][height];
+		pattern = new boolean[width][height];
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				blueprint[x][y] = s.getBlueprint()[x][y];
+				pattern[x][y] = s.getPattern()[x][y];
 			}
 		}
 	}
@@ -37,7 +37,7 @@ public class StructureBlueprint {
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				s += blueprint[x][y] ? "1" : "0";
+				s += pattern[x][y] ? "1" : "0";
 			}
 			s += ".";
 		}
@@ -57,36 +57,36 @@ public class StructureBlueprint {
 		return rotations;
 	}
 	
-	public boolean[][] getBlueprint() {
-		return blueprint;
+	public boolean[][] getPattern() {
+		return pattern;
 	}
 	
 	public void rotate(int addedRotations) {
 		addedRotations = addedRotations < 0 ? 4 + (addedRotations % 4) : addedRotations % 4; 
-		boolean[][] newBlueprint;
+		boolean[][] newPattern;
 		
 		switch(addedRotations) {
 		case 1:
-			newBlueprint = new boolean[height][width];
+			newPattern = new boolean[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
-					newBlueprint[y][x] = blueprint[x][height - y - 1];
+					newPattern[y][x] = pattern[x][height - y - 1];
 				}
 			}
 			break;
 		case 2:
-			newBlueprint = new boolean[width][height];
+			newPattern = new boolean[width][height];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
-					newBlueprint[x][y] = blueprint[width - x - 1][height - y - 1];
+					newPattern[x][y] = pattern[width - x - 1][height - y - 1];
 				}
 			}
 			break;
 		case 3:
-			newBlueprint = new boolean[height][width];
+			newPattern = new boolean[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
-					newBlueprint[y][x] = blueprint[width - x - 1][y];
+					newPattern[y][x] = pattern[width - x - 1][y];
 				}
 			}
 			break;
@@ -95,9 +95,9 @@ public class StructureBlueprint {
 		}
 		
 		rotations = (rotations + addedRotations) % 4;
-		blueprint = newBlueprint;
-		width = blueprint.length;
-		height = blueprint[0].length;
+		pattern = newPattern;
+		width = pattern.length;
+		height = pattern[0].length;
 	}
 	
 	@Override

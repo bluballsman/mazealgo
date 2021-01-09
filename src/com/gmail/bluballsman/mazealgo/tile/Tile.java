@@ -22,8 +22,8 @@ public class Tile {
 			surroundingTileBits = surroundingTileBits << 1;
 			surroundingTileBits += isGround == surroundingTiles[i] ? 1 : 0;
 		}
-		
 		surroundingTileBits = surroundingTileBits | (surroundingTileBits << 4);
+		
 		while(Type.getType(surroundingTileBits) == null) {
 			surroundingTileBits = surroundingTileBits >> 1;
 			rotations++;

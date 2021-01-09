@@ -1,14 +1,13 @@
 package com.gmail.bluballsman.mazealgo;
 
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
 
 import com.gmail.bluballsman.mazealgo.loc.Direction;
 import com.gmail.bluballsman.mazealgo.structure.StructureBlueprint;
+import com.gmail.bluballsman.mazealgo.structure.StructureEntry;
 import com.gmail.bluballsman.mazealgo.tile.Tile;
 
 public class Maze {
@@ -17,7 +16,7 @@ public class Maze {
 	private int centerRadius;
 	private boolean[][] walls;
 	private boolean[][] structureFlags;
-	private HashMap<Point, StructureBlueprint> structures = new HashMap<Point, StructureBlueprint>();
+	private ArrayList<StructureEntry> structures;
 	private Random random = new Random();
 	
 	public Maze(int width, int height, int centerRadius) {
@@ -34,6 +33,25 @@ public class Maze {
 		random.setSeed(randomSeed);
 	}
 	
+	private void drawStructure(Point p, StructureBlueprint blueprint, boolean symmetrical) {
+		for(int y = 0; y < blueprint.getHeight(); y++) {
+			for(int x = 0; x < blueprint.getWidth(); x++) {
+				int tileX = x + p.x;
+				int tileY = y + p.y;
+				setGround(tileX, tileY, blueprint.getPattern()[x][y], symmetrical);
+				setStructureFlag(tileX, tileY, true, symmetrical);
+			}
+		}
+		structures.add(new StructureEntry(p, blueprint));
+		
+		if(symmetrical) {
+			StructureBlueprint mirrorBlueprint = new StructureBlueprint(blueprint);
+			Point mirrorPoint = getMirrorPoint(p);
+			mirrorBlueprint.rotate(2);
+			structures.add(new StructureEntry(mirrorPoint, mirrorBlueprint));
+		}
+	}
+	
 	private void markCenter() {
 		int diameter = (centerRadius * 2) + 1;
 		String ones = "1".repeat(diameter);
@@ -47,7 +65,7 @@ public class Maze {
 				setStructureFlag(x, y, true, false);
 			}
 		}
-		structures.put(corner, centerBlueprint);
+		structures.add(new StructureEntry(corner, centerBlueprint));
 	}
 	
 	public int getWidth() {
@@ -103,10 +121,10 @@ public class Maze {
 		return getTile(p.x, p.y);
 	}
 	
-	public boolean matchesStructurePattern(int px, int py, StructureBlueprint structure) {
-		for(int y = 0; y < structure.getHeight(); y++) {
-			for(int x = 0; x < structure.getWidth(); x++) {
-				if(structure.getBlueprint()[x][y] != isGround(x + px, y + py)) {
+	public boolean matchesStructureBlueprint(int px, int py, StructureBlueprint blueprint) {
+		for(int y = 0; y < blueprint.getHeight(); y++) {
+			for(int x = 0; x < blueprint.getWidth(); x++) {
+				if(blueprint.getPattern()[x][y] != isGround(x + px, y + py)) {
 					return false;
 				}
 			}
@@ -115,28 +133,21 @@ public class Maze {
 		return true;
 	}
 	
-	public boolean matchesStructurePattern(Point p, StructureBlueprint structure) {
-		return matchesStructurePattern(p.x, p.y, structure);
+	public boolean matchesStructureBlueprint(Point p, StructureBlueprint blueprint) {
+		return matchesStructureBlueprint(p.x, p.y, blueprint);
 	}
 	
-	public boolean doesStructureCollide(int px, int py, StructureBlueprint structure) {
+	public boolean doesStructureCollide(int px, int py, StructureBlueprint blueprint) {
 		if(isStructure(px, py)) {
 			return true;
 		}
 		
-		Rectangle rect = new Rectangle();
-		rect.setBounds(px, py, structure.getWidth(), structure.getHeight());
-		
-		for(Point p : structures.keySet()) {
-			StructureBlueprint s = structures.get(p);
-			Rectangle r = new Rectangle();
-			r.setBounds(p.x, p.y, s.getWidth(), s.getHeight());
-			
-			if(r.intersects(rect)) {
+		StructureEntry entry = new StructureEntry(px, py, blueprint);
+		for(StructureEntry s : structures) {
+			if(s.intersects(entry)) {
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
@@ -247,22 +258,7 @@ public class Maze {
 		}
 		while(doesStructureCollide(randomEven, blueprint));
 		
-		for(int y = 0; y < blueprint.getHeight(); y++) {
-			for(int x = 0; x < blueprint.getWidth(); x++) {
-				int tileX = x + randomEven.x;
-				int tileY = y + randomEven.y;
-				setGround(tileX, tileY, blueprint.getBlueprint()[x][y], symmetrical);
-				setStructureFlag(tileX, tileY, true, symmetrical);
-			}
-		}
-		structures.put(randomEven, blueprint);
-		
-		if(symmetrical) {
-			StructureBlueprint mirrorBlueprint = new StructureBlueprint(blueprint);
-			Point mirrorPoint = getMirrorPoint(randomEven);
-			mirrorBlueprint.rotate(2);
-			structures.put(mirrorPoint, mirrorBlueprint);
-		}
+		drawStructure(randomEven, blueprint, symmetrical);
 	}
 	
 	public void knockDownWalls(float openWallPercentage, boolean symmetrical) {
@@ -302,11 +298,55 @@ public class Maze {
 		}
 	}
 	
+	public boolean placeStructure(StructureBlueprint blueprint, boolean symmetrical) {
+		ArrayList<StructureEntry> matches = new ArrayList<StructureEntry>();
+		
+		for(int rotations = 0; rotations < 4; rotations++) {
+			StructureBlueprint b = new StructureBlueprint(blueprint);
+			b.rotate(rotations);
+			
+			for(int y = 1; y < height - 1; y++) {
+				for(int x = 1; x < width - 1; x++) {
+					if(matchesStructureBlueprint(x, y, b) && doesStructureCollide(x, y, b)) {
+						matches.add(new StructureEntry(x, y, b));
+					}
+				}
+			}
+		}
+		
+		int nMatches = matches.size();
+		
+		if(nMatches == 0) {
+			return false;
+		}
+		else {
+			StructureEntry chosenEntry = matches.get(nMatches);
+			
+			for(int y = 0; y < chosenEntry.getBlueprint().getHeight(); y++) {
+				for(int x = 0; x < chosenEntry.getBlueprint().getWidth(); x++) {
+					setStructureFlag(x + chosenEntry.getX(), y + chosenEntry.getY(), true, symmetrical);
+				}
+			}
+			structures.add(chosenEntry);
+			
+			if(symmetrical) {
+				StructureBlueprint mirrorBlueprint = new StructureBlueprint(chosenEntry.getBlueprint());
+				Point mirrorPoint = getMirrorPoint(chosenEntry.getX(), chosenEntry.getY());
+				mirrorBlueprint.rotate(2);
+				structures.add(new StructureEntry(mirrorPoint, mirrorBlueprint));
+			}
+			
+			return true;
+		}
+		
+	}
+	
 	public void test() {
 		String string = "0000000.0111110.0111110.1111110.0000000";
 		StructureBlueprint s = new StructureBlueprint(string);
 		
 		excavateRoom(s, true);
 	}
+	
 	
 }
