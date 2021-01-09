@@ -19,15 +19,27 @@ public class StructureBlueprint {
 		}
 	}
 	
-	@Override
-	public String toString() {
+	public StructureBlueprint(StructureBlueprint s) {
+		width = s.getWidth();
+		height = s.getHeight();
+		rotations = s.getRotations();
+		blueprint = new boolean[width][height];
+		
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				blueprint[x][y] = s.getBlueprint()[x][y];
+			}
+		}
+	}
+	
+	public String getBlueprintString() {
 		String s = "";
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
 				s += blueprint[x][y] ? "1" : "0";
 			}
-			s += "\n";
+			s += ".";
 		}
 		
 		return s;
@@ -49,44 +61,53 @@ public class StructureBlueprint {
 		return blueprint;
 	}
 	
-	public StructureBlueprint rotate(int addedRotations) {
+	public void rotate(int addedRotations) {
 		addedRotations = addedRotations < 0 ? 4 + (addedRotations % 4) : addedRotations % 4; 
 		boolean[][] newBlueprint;
 		
-		if(addedRotations == 0) {
-			newBlueprint = blueprint;
-		}
-		else if(addedRotations == 1) {
+		switch(addedRotations) {
+		case 1:
 			newBlueprint = new boolean[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[y][x] = blueprint[x][height - y - 1];
 				}
 			}
-		}
-		else if(addedRotations == 2) {
+			break;
+		case 2:
 			newBlueprint = new boolean[width][height];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[x][y] = blueprint[width - x - 1][height - y - 1];
 				}
 			}
-		}
-		else {
+			break;
+		case 3:
 			newBlueprint = new boolean[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[y][x] = blueprint[width - x - 1][y];
 				}
 			}
+			break;
+		default:
+			return;
 		}
 		
 		rotations = (rotations + addedRotations) % 4;
 		blueprint = newBlueprint;
 		width = blueprint.length;
 		height = blueprint[0].length;
-		
-		return this;
+	}
+	
+	@Override
+	public String toString() {
+		return getBlueprintString().replace('.', '\n');
+	}
+	
+	@Override
+	public int hashCode() {
+		return getBlueprintString().hashCode() + rotations;
 	}
 	
 }
