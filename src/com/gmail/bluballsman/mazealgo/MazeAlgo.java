@@ -6,8 +6,8 @@ import javax.swing.JFrame;
 
 public class MazeAlgo {
 	static final int tileSize = 10;
-	static final int width = 55;
-	static final int height = 55;
+	static final int width = 63;
+	static final int height = 63;
 	
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("Maze");

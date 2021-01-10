@@ -28,16 +28,20 @@ public class MazeCanvas extends Canvas {
 	@Override
 	public void paint(Graphics g) {
 		maze = new Maze(mazeWidth, mazeHeight, 4);
-		maze.test();
+		maze.excavateRoom("0001000.0111110.0111110.0111110.0000000", true);
 		maze.fillMaze(true);
 		maze.knockDownWalls(.06F, true);
-		maze.openUpCenter();
+		maze.test2();
 		for(int y = 0; y < maze.getHeight(); y++) {
 			for(int x = 0; x < maze.getWidth(); x++) {
 				int paintX = tileSize * x;
 				int paintY = tileSize * y;
 				Tile t = maze.getTile(x, y);
 				Color color = t.isGround() ? new Color(255, 255, 255) : new Color(0, 0, 0);
+				if(t.isStructure()) {
+					color = t.isGround() ? new Color(220, 223, 230) : new Color(105, 107, 112);
+				}
+				
 				g.setColor(color);
 				g.fillRect(paintX, paintY, tileSize, tileSize);
 			}

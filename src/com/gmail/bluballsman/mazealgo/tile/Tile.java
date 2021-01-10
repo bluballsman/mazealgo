@@ -1,36 +1,33 @@
 package com.gmail.bluballsman.mazealgo.tile;
 
+import java.awt.Point;
 import java.util.HashMap;
 
+import com.gmail.bluballsman.mazealgo.Maze;
+
 public class Tile {
+	private final Maze maze;
+	private final int x;
+	private final int y;
 	private boolean isGround = false;
 	private boolean structureFlag = false;
-	private Type type = null;
-	private int rotations = 0;
 	
-	public Tile(boolean isGround, boolean structureFlag, boolean[] surroundingTiles) {
-		this.isGround = isGround;
-		this.structureFlag = structureFlag;
-		initializeRotationAndType(surroundingTiles);
+	public Tile(Maze maze, int x, int y) {
+		this.maze = maze;
+		this.x = x;
+		this.y = y;
 	}
 	
-	private void initializeRotationAndType(boolean[] surroundingTiles) {
-		int surroundingTileBits = 0;
-		int rotations = 0;
-		
-		for(int i = 0; i < 4; i++) {
-			surroundingTileBits = surroundingTileBits << 1;
-			surroundingTileBits += isGround == surroundingTiles[i] ? 1 : 0;
-		}
-		surroundingTileBits = surroundingTileBits | (surroundingTileBits << 4);
-		
-		while(Type.getType(surroundingTileBits) == null) {
-			surroundingTileBits = surroundingTileBits >> 1;
-			rotations++;
-		}
-		
-		this.type = Type.getType(surroundingTileBits);
-		this.rotations = rotations;
+	public int getX() {
+		return x;
+	}
+	
+	public int getY() {
+		return y;
+	}
+	
+	public Point getLocation() {
+		return new Point(x, y);
 	}
 	
 	public boolean isGround() {
@@ -42,11 +39,38 @@ public class Tile {
 	}
 	
 	public Type getType() {
-		return type;
+		return Type.getType(getTypeCode());
 	}
 	
 	public int getRotations() {
-		return rotations;
+		return Type.getRotations(getTypeCode());
+	}
+	
+	public Tile getMirrorTile() {
+		return maze.getTile(maze.getMirrorPoint(x, y));
+	}
+	
+	public void setGround(boolean isGround) {
+		this.isGround = isGround;
+	}
+	
+	public void setStructureFlag(boolean structureFlag) {
+		this.structureFlag = structureFlag;
+	}
+	
+	private int getTypeCode() {
+		Tile north = maze.getTile(x, y + 1);
+		Tile east = maze.getTile(x + 1, y);
+		Tile south = maze.getTile(x, y - 1);
+		Tile west = maze.getTile(x - 1, y);
+		
+		int typeCode = 0;
+		typeCode += north == null || north.isGround ? 0b0001 : 0;
+		typeCode += east == null || east.isGround ? 0b0010 : 0;
+		typeCode += south == null || south.isGround ? 0b0100 : 0;
+		typeCode += west == null || west.isGround ? 0b1000 : 0;
+		
+		return typeCode;
 	}
 	
 	public static enum Type {
@@ -58,16 +82,25 @@ public class Tile {
 		ALONE(0b0000);
 		
 		static HashMap<Integer, Type> codeMap = new HashMap<Integer, Type>();
+		static HashMap<Integer, Integer> rotationMap = new HashMap<Integer, Integer>();
 		
 		static {
 			for(Type type: values()) {
-				codeMap.put(type.typeCode, type);
+				int dummyCode = type.typeCode + (type.typeCode << 4);
+				for(int rotations = 0; rotations < 4; rotations++) {
+					int rotatedTypeCode = (dummyCode << rotations) & 0b00001111;
+					codeMap.put(rotatedTypeCode, type);
+					rotationMap.put(rotatedTypeCode, rotations);
+				}
 			}
 		}
 		
-		public static Type getType(int typeCode) {
-			typeCode = typeCode & 0b00001111;
+		private static Type getType(int typeCode) {
 			return codeMap.get(typeCode);
+		}
+		
+		private static int getRotations(int typeCode) {
+			return rotationMap.get(typeCode);
 		}
 		
 		private final int typeCode;
