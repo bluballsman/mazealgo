@@ -4,10 +4,10 @@ import java.awt.Canvas;
 
 import javax.swing.JFrame;
 
-public class MazeAlgo {
+public class Main {
 	static final int tileSize = 10;
-	static final int width = 63;
-	static final int height = 63;
+	static final int width = 61;
+	static final int height = 65;
 	
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("Maze");

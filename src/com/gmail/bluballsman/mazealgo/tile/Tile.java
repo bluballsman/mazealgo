@@ -3,7 +3,7 @@ package com.gmail.bluballsman.mazealgo.tile;
 import java.awt.Point;
 import java.util.HashMap;
 
-import com.gmail.bluballsman.mazealgo.Maze;
+import com.gmail.bluballsman.mazealgo.maze.Maze;
 
 public class Tile {
 	private final Maze maze;

@@ -3,11 +3,12 @@ package com.gmail.bluballsman.mazealgo.structure;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import com.gmail.bluballsman.mazealgo.Maze;
+import com.gmail.bluballsman.mazealgo.maze.Maze;
+import com.gmail.bluballsman.mazealgo.tile.Tile;
 
 public class StructureSlot {
 	private Maze maze;
-	private boolean[][] blueprint;
+	private BlueprintCharacter[][] blueprint;
 	private int rotations = 0;
 	private Rectangle boundingBox = new Rectangle();
 	
@@ -16,25 +17,28 @@ public class StructureSlot {
 		String[] blueprintString = strucString.split("[.]");
 		boundingBox.width = blueprintString[0].length();
 		boundingBox.height = blueprintString.length;
-		blueprint = new boolean[getWidth()][getHeight()];
+		blueprint = new BlueprintCharacter[getWidth()][getHeight()];
 		
 		for(int y = 0; y < getHeight(); y++) {
 			for(int x = 0; x < getWidth(); x++) {
-				blueprint[x][y] = blueprintString[y].charAt(x) == '1';
+				char c = blueprintString[y].charAt(x);
+				blueprint[x][y] = BlueprintCharacter.getByCharacter(c);
 			}
 		}
+	}
+	
+	public StructureSlot(Maze maze, String strucString, int rotations) {
+		this(maze, strucString);
+		rotate(rotations);
 	}
 	
 	public StructureSlot(StructureSlot s) {
 		maze = s.maze;
 		rotations = s.getRotations();
-		blueprint = new boolean[s.getWidth()][s.getHeight()];
+		blueprint = new BlueprintCharacter[s.getWidth()][s.getHeight()];
 		boundingBox.setSize(s.getWidth(), s.getHeight());
 		boundingBox.x = s.getX();
 		boundingBox.y = s.getY();
-		
-		System.out.println(" " + s.getWidth() + " " + s.getHeight() + " " + getWidth() + " " + getHeight());
-		System.out.println(" " + s.getLocation() + " " + getLocation());
 		
 		for(int y = 0; y < s.getHeight(); y++) {
 			for(int x = 0; x < s.getWidth(); x++) {
@@ -48,7 +52,7 @@ public class StructureSlot {
 		
 		for(int y = 0; y < getHeight(); y++) {
 			for(int x = 0; x < getWidth(); x++) {
-				s += blueprint[x][y] ? "1" : "0";
+				s += blueprint[x][y].getCharacter();
 			}
 			s += ".";
 		}
@@ -90,14 +94,16 @@ public class StructureSlot {
 		return mirrorSlot;
 	}
 	
-	public boolean[][] getBlueprint() {
+	public BlueprintCharacter[][] getBlueprint() {
 		return blueprint;
 	}
 	
 	public boolean canPlace() {
 		for(int y = 0; y < getHeight(); y++) {
 			for(int x = 0; x < getWidth(); x++) {
-				if(blueprint[x][y] != maze.isGround(x + getX(), y + getY())) {
+				Tile t = maze.getTile(x + getX(), y + getY());
+				
+				if(!blueprint[x][y].matchesTile(t)) {
 					return false;
 				}
 			}
@@ -107,6 +113,10 @@ public class StructureSlot {
 	
 	public boolean intersects(StructureSlot b) {
 		return b.boundingBox.intersects(boundingBox);
+	}
+	
+	public boolean isPointInSlot(Point p) {
+		return boundingBox.contains(p);
 	}
 	
 	public void setLocation(int x, int y) {
@@ -129,12 +139,12 @@ public class StructureSlot {
 	public void rotate(int addedRotations) {
 		int height = getHeight();
 		int width = getWidth();
-		boolean[][] newBlueprint;
+		BlueprintCharacter[][] newBlueprint;
 		addedRotations = addedRotations < 0 ? 4 + (addedRotations % 4) : addedRotations % 4; 
 		
 		switch(addedRotations) {
 		case 1:
-			newBlueprint = new boolean[height][width];
+			newBlueprint = new BlueprintCharacter[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[y][x] = blueprint[x][height - y - 1];
@@ -142,7 +152,7 @@ public class StructureSlot {
 			}
 			break;
 		case 2:
-			newBlueprint = new boolean[width][height];
+			newBlueprint = new BlueprintCharacter[width][height];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[x][y] = blueprint[width - x - 1][height - y - 1];
@@ -150,7 +160,7 @@ public class StructureSlot {
 			}
 			break;
 		case 3:
-			newBlueprint = new boolean[height][width];
+			newBlueprint = new BlueprintCharacter[height][width];
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					newBlueprint[y][x] = blueprint[width - x - 1][y];
@@ -170,7 +180,7 @@ public class StructureSlot {
 	public void markStructureTiles() {
 		for(int y = 0; y < getHeight(); y++) {
 			for(int x = 0; x < getWidth(); x++) {
-				maze.setStructureFlag(x + getX(), y + getY(), true, false);
+				maze.setStructureFlag(x + getX(), y + getY(), true);
 			}
 		}
 	}
@@ -178,7 +188,15 @@ public class StructureSlot {
 	public void drawStructureTiles() {
 		for(int y = 0; y < getHeight(); y++) {
 			for(int x = 0; x < getWidth(); x++) {
-				maze.setGround(x + getX(), y + getY(), blueprint[x][y], false);
+				BlueprintCharacter bc = blueprint[x][y];
+				Point p = new Point(x + getX(), y + getY());
+				
+				if(bc == BlueprintCharacter.WALL) {
+					maze.setGround(p, false);
+				}
+				else if(bc == BlueprintCharacter.GROUND) {
+					maze.setGround(p, true);
+				}
 			}
 		}
 	}
@@ -191,6 +209,20 @@ public class StructureSlot {
 	@Override
 	public int hashCode() {
 		return getBlueprintString().hashCode() + rotations;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o == this) {
+			return true;
+		}
+		if(o == null || o.getClass() != getClass()) {
+			return false;
+		}
+		
+		StructureSlot otherSlot = (StructureSlot) o;
+		
+		return otherSlot.maze == maze && otherSlot.blueprint.equals(blueprint);
 	}
 	
 }
