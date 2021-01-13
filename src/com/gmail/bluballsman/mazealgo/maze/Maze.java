@@ -40,14 +40,8 @@ public class Maze {
 	}
 	
 	private void markCenter() {
-		String center1 = "000000000.000000000.000000000.000000000.000000000.000000000.000000000.000000000.000000000";
-		String center2 = "011101110.111111111.111111111.111111111.011111110.111111111.111111111.111111111.011101110";
-		String center3 = "111111111.111111111.111111111.111111111.111111111.111111111.111111111.111111111.111111111";
-		String center4 = "00000000000.00000000000.00000000000.00000000000.00000000000.00000000000.00000000000.00000000000.00000000000.00000000000.00000000000";
-		String center5 = "01111111110.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.01111111110";
-		String center6 = "11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111.11111111111";
-		String center7 = "00000000000.01111111110.01111111110.01111111110.01111111110.01111111110.01111111110.01111111110.01111111110.01111111110.00000000000";
-		StructureSlot centerSlot = new StructureSlot(this, center3);
+		String centerBlueprint = "XX11111XX.X1111111X.111111111.111111111.111111111.111111111.111111111.X1111111X.XX11111XX";
+		StructureSlot centerSlot = new StructureSlot(this, centerBlueprint);
 		int radius = (centerSlot.getWidth() / 2);
 		Point center = getCenterPoint();
 		Point corner = new Point(center.x - radius, center.y - radius);
@@ -179,29 +173,34 @@ public class Maze {
 		return p;
 	}
 	
-	
-	public StructureSlot placeStructure(String strucPattern) {
+	public ArrayList<StructureSlot> findMatches(String strucPattern) {
 		ArrayList<StructureSlot> matches = new ArrayList<StructureSlot>();
+		StructureSlot s = new StructureSlot(this, strucPattern);
 		
 		for(int rotations = 0; rotations < 4; rotations++) {
+			s.rotate(1);
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
-					StructureSlot s = new StructureSlot(this, strucPattern, rotations);
 					s.setLocation(x, y);
 					
-					if(s.canPlace() && !doesStructureSlotCollide(s)) {
-						matches.add(s);
+					if(s.canPlace()) {
+						matches.add(s.clone());
 					}
 				}
 			}
 		}
 		
-		int nMatches = matches.size();
-		if(nMatches == 0) {
+		return matches;
+	}
+	
+	public StructureSlot placeStructure(String strucPattern) {
+		ArrayList<StructureSlot> matches = findMatches(strucPattern);
+		
+		if(matches.size() == 0) {
 			return null;
 		}
 		else {
-			StructureSlot chosenSlot = matches.get(random.nextInt(nMatches));
+			StructureSlot chosenSlot = matches.get(random.nextInt(matches.size()));
 			chosenSlot.markStructureTiles();
 			structures.add(chosenSlot);
 			
@@ -217,7 +216,7 @@ public class Maze {
 			randomEven = freeRandomEvenPoint(1, 1, width - 1 - roomSlot.getWidth(), height - 1 - roomSlot.getHeight());
 			roomSlot.setLocation(randomEven);
 		}
-		while(doesStructureSlotCollide(roomSlot));
+		while(roomSlot.doesSlotHaveStructure());
 		
 		roomSlot.markStructureTiles();
 		roomSlot.drawStructureTiles();
@@ -282,8 +281,9 @@ public class Maze {
 	public void knockDownWalls(float openWallPercentage) {
 		ArrayList<Point> availableWalls = new ArrayList<Point>();
 		
-		// All the available walls to knock down are on even points (both even numbers for x and y)
-		// or on points where x and y are even and odd. That's what (1 + y % 2) is for
+		// All the available walls to knock down are on points where x and y are even and odd
+		// but not both. That's what (1 + y % 2) is for, it makes it so that x starts on an even number if y is odd
+		// and vice versa
 		for(int y = 1; y < height - 1; y++) {
 			for(int x = 1 + y % 2; x < width - 1; x+=2) {
 				if(!isGround(x, y) && !isStructure(x, y)) {

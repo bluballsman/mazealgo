@@ -28,12 +28,15 @@ public class MazeCanvas extends Canvas {
 	
 	@Override
 	public void paint(Graphics g) {
+		long test = System.currentTimeMillis();
 		maze = new SymmetricMaze(mazeWidth, mazeHeight, 4);
 		maze.testRooms();
 		maze.fillMaze();
 		maze.knockDownWalls(.08F);
 		maze.openUpCenter();
 		maze.testStructures();
+		System.out.println("Finished in " + (System.currentTimeMillis() - test));
+
 		for(int y = 0; y < maze.getHeight(); y++) {
 			for(int x = 0; x < maze.getWidth(); x++) {
 				int paintX = tileSize * x;

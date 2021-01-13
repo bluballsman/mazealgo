@@ -24,13 +24,17 @@ public class SymmetricMaze extends Maze {
 	}
 	
 	public void setGroundSymmetric(Point p, boolean isGround) {
-		setGroundSymmetric(p, isGround);
+		setGroundSymmetric(p.x, p.y, isGround);
 	}
 	
 	public void setStructureFlagSymmetric(int x, int y, boolean structureFlag) {
 		Point mirror = getMirrorPoint(x, y);
 		setStructureFlag(x, y, structureFlag);
 		setStructureFlag(mirror, structureFlag);
+	}
+	
+	public void setStructureFlagSymmetric(Point p, boolean structureFlag) {
+		setStructureFlagSymmetric(p.x, p.y, structureFlag);
 	}
 	
 	@Override
@@ -65,8 +69,7 @@ public class SymmetricMaze extends Maze {
 		Point currentPoint = freeRandomOddPoint(1, 1, width - 1, height - 1);
 		Stack<Point> path = new Stack<Point>();
 		path.push(currentPoint);
-		setGround(currentPoint, true);
-		setGround(getMirrorPoint(currentPoint), true);
+		setGroundSymmetric(currentPoint, true);
 		
 		while(!path.isEmpty()) {
 			ArrayList<Direction> availableDirections = new ArrayList<Direction>();
@@ -88,11 +91,9 @@ public class SymmetricMaze extends Maze {
 				Direction chosenDirection = availableDirections.get(random.nextInt(availableDirections.size()));
 				
 				currentPoint.translate(chosenDirection.X_OFFSET, chosenDirection.Y_OFFSET);
-				setGround(currentPoint, true);
-				setGround(getMirrorPoint(currentPoint), true);
+				setGroundSymmetric(currentPoint, true);
 				currentPoint.translate(chosenDirection.X_OFFSET, chosenDirection.Y_OFFSET);
-				setGround(currentPoint, true);
-				setGround(getMirrorPoint(currentPoint), true);
+				setGroundSymmetric(currentPoint, true);
 				path.push(new Point(currentPoint));
 			}
 			else {
@@ -116,6 +117,7 @@ public class SymmetricMaze extends Maze {
 			}
 		}
 		
+		// Center line
 		for(int x = 1 + centerPoint.y % 2; x <= centerPoint.x; x+=2) {
 			if(!isGround(x, centerPoint.y) && !isStructure(x, centerPoint.y)) {
 				availableWalls.add(new Point(x, centerPoint.y));
@@ -136,12 +138,12 @@ public class SymmetricMaze extends Maze {
 	public void testRooms() {
 		excavateRoom("0001000.0111110.0111110.0111110.0000000");
 		excavateRoom("00000.01110.01110.01110.01000");
-		excavateRoom("00010.01110.01110.01110.01000");
+		excavateRoom("0000010.0111110.0111110.0111110.0100000");
 	}
 	
 	public void testStructures() {
-		
-		/*
+		placeStructure("000.010");
+		placeStructure("000.010");
 		placeStructure("000.010");
 		placeStructure("000.010");
 		placeStructure("000.010");
@@ -154,7 +156,6 @@ public class SymmetricMaze extends Maze {
 		placeStructure("111.101.111");
 		placeStructure("111.101.111");
 		placeStructure("00.10.10.10.10.10");
-		*/
 		placeStructure("X0X.101.101.101.101.101.X0X");
 	}
 

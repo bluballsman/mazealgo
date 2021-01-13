@@ -64,20 +64,25 @@ public class Tile {
 		Tile south = maze.getTile(x, y - 1);
 		Tile west = maze.getTile(x - 1, y);
 		
+		boolean northIsGround = north == null || north.isGround;
+		boolean eastIsGround = east == null || east.isGround;
+		boolean southIsGround = south == null || south.isGround;
+		boolean westIsGround = west == null || west.isGround;
+		
 		int typeCode = 0;
-		typeCode += north == null || north.isGround ? 0b0001 : 0;
-		typeCode += east == null || east.isGround ? 0b0010 : 0;
-		typeCode += south == null || south.isGround ? 0b0100 : 0;
-		typeCode += west == null || west.isGround ? 0b1000 : 0;
+		typeCode += northIsGround == isGround ? 0b1000 : 0;
+		typeCode += eastIsGround == isGround ? 0b0100 : 0;
+		typeCode += southIsGround == isGround ? 0b0010 : 0;
+		typeCode += westIsGround == isGround ? 0b0001 : 0;
 		
 		return typeCode;
 	}
 	
 	public static enum Type {
-		T(0b0111),
-		CORNER(0b0011),
-		STRAIGHT(0b0101),
-		END(0b0001),
+		T(0b1101),
+		CORNER(0b1100),
+		STRAIGHT(0b1010),
+		END(0b0010),
 		CROSS(0b1111),
 		ALONE(0b0000);
 		
@@ -88,9 +93,9 @@ public class Tile {
 			for(Type type: values()) {
 				int dummyCode = type.typeCode + (type.typeCode << 4);
 				for(int rotations = 0; rotations < 4; rotations++) {
-					int rotatedTypeCode = (dummyCode << rotations) & 0b00001111;
-					codeMap.put(rotatedTypeCode, type);
-					rotationMap.put(rotatedTypeCode, rotations);
+					int rotatedTypeCode = (dummyCode >> rotations) & 0b00001111;
+					codeMap.putIfAbsent(rotatedTypeCode, type);
+					rotationMap.putIfAbsent(rotatedTypeCode, rotations);
 				}
 			}
 		}
