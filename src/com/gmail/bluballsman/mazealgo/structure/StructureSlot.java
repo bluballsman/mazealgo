@@ -1,7 +1,6 @@
 package com.gmail.bluballsman.mazealgo.structure;
 
 import java.awt.Point;
-import java.awt.Rectangle;
 
 import com.gmail.bluballsman.mazealgo.maze.Maze;
 import com.gmail.bluballsman.mazealgo.tile.Tile;
@@ -141,19 +140,6 @@ public class StructureSlot {
 		return true;
 	}
 	
-	public boolean intersects(StructureSlot b) {
-		Rectangle r = new Rectangle(x, y, width, height);
-		Rectangle r2 = new Rectangle(b.x, b.y, b.width, b.height);
-		
-		return r.intersects(r2);
-	}
-	
-	public boolean isPointInSlot(Point p) {
-		Rectangle r = new Rectangle(x, y, width, height);
-		
-		return r.contains(p);
-	}
-	
 	public void setLocation(int x, int y) {
 		this.x = x;
 		this.y = y;
@@ -241,7 +227,7 @@ public class StructureSlot {
 	
 	@Override
 	public int hashCode() {
-		return getBlueprintString().hashCode() + rotations;
+		return maze.hashCode() + blueprint.hashCode();
 	}
 	
 	@Override

@@ -117,24 +117,6 @@ public class Maze {
 		return getTile(p.x, p.y);
 	}
 	
-	public boolean doesStructureSlotCollide(StructureSlot slot) {
-		for(StructureSlot s : structures) {
-			if(slot.intersects(s)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean doesPointCollide(Point p) {
-		for(StructureSlot s : structures) {
-			if(s.isPointInSlot(p)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public Point freeRandomEvenPoint(int minX, int minY, int maxX, int maxY) {
 		minX = minX % 2 == 0 ? minX : minX + 1;
 		minY = minY % 2 == 0 ? minY : minY + 1;
@@ -149,7 +131,7 @@ public class Maze {
 			p.x = 2 * random.nextInt(nEvensX) + minX;
 			p.y = 2 * random.nextInt(nEvensY) + minY;
 		} 
-		while(doesPointCollide(p));
+		while(isStructure(p));
 
 		return p;
 	}
@@ -168,7 +150,7 @@ public class Maze {
 			p.x = (2 * random.nextInt(nOddsX)) + minX;
 			p.y = (2 * random.nextInt(nOddsY)) + minY;
 		} 
-		while(doesPointCollide(p));
+		while(isStructure(p));
 		
 		return p;
 	}
@@ -179,8 +161,8 @@ public class Maze {
 		
 		for(int rotations = 0; rotations < 4; rotations++) {
 			s.rotate(1);
-			for(int y = 0; y < height; y++) {
-				for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height - s.getHeight(); y++) {
+				for(int x = 0; x < width - s.getWidth(); x++) {
 					s.setLocation(x, y);
 					
 					if(s.canPlace()) {
