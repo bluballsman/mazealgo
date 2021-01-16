@@ -51,6 +51,7 @@ public class SymmetricMaze extends Maze {
 					
 					if(s.canPlace()) {
 						matches.add(s.clone());
+						matches.add(s.getMirrorSlot());
 					}
 				}
 			}
@@ -60,6 +61,7 @@ public class SymmetricMaze extends Maze {
 				
 				if(s.canPlace()) {
 					matches.add(s.clone());
+					matches.add(s.getMirrorSlot());
 				}
 			}
 		}
