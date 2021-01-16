@@ -9,12 +9,12 @@ import com.gmail.bluballsman.mazealgo.structure.StructureSlot;
 
 public class SymmetricMaze extends Maze {
 
-	public SymmetricMaze(int width, int height, int centerRadius) {
-		super(width, height, centerRadius);
+	public SymmetricMaze(int width, int height) {
+		super(width, height);
 	}
 	
-	public SymmetricMaze(int width, int height, int centerRadius, long randomSeed) {
-		super(width, height, centerRadius, randomSeed);
+	public SymmetricMaze(int width, int height, long randomSeed) {
+		super(width, height, randomSeed);
 	}
 	
 	public void setGroundSymmetric(int x, int y, boolean isGround) {
@@ -36,6 +36,37 @@ public class SymmetricMaze extends Maze {
 	public void setStructureFlagSymmetric(Point p, boolean structureFlag) {
 		setStructureFlagSymmetric(p.x, p.y, structureFlag);
 	}
+	
+	@Override
+	public ArrayList<StructureSlot> findMatches(String strucPattern) {
+		ArrayList<StructureSlot> matches = new ArrayList<StructureSlot>();
+		Point centerPoint = getCenterPoint();
+		StructureSlot s = new StructureSlot(this, strucPattern);
+		
+		for(int rotations = 0; rotations < 4; rotations++) {
+			s.rotate(1);
+			for(int y = 0; y < centerPoint.y; y++) {
+				for(int x = 0; x < width - s.getWidth(); x++) {
+					s.setLocation(x, y);
+					
+					if(s.canPlace()) {
+						matches.add(s.clone());
+					}
+				}
+			}
+			
+			for(int x = 0; x <= centerPoint.x; x++) {
+				s.setLocation(x, centerPoint.y);
+				
+				if(s.canPlace()) {
+					matches.add(s.clone());
+				}
+			}
+		}
+		
+		return matches;
+	}
+	
 	
 	@Override
 	public StructureSlot placeStructure(String strucPattern) {
@@ -156,6 +187,7 @@ public class SymmetricMaze extends Maze {
 		placeStructure("111.101.111");
 		placeStructure("111.101.111");
 		placeStructure("00.10.10.10.10.10");
+		placeStructure("11111.10101.11111");
 		placeStructure("X0X.101.101.101.101.101.X0X");
 	}
 

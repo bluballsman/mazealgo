@@ -15,13 +15,12 @@ public class Maze {
 	protected int centerRadius;
 	protected Tile[][] tiles;
 	protected ArrayList<StructureSlot> structures = new ArrayList<StructureSlot>();
-	protected StructureSlot centerStrucSlot;
+	protected StructureSlot centerSlot;
 	protected Random random = new Random();
 	
-	public Maze(int width, int height, int centerRadius) {
+	public Maze(int width, int height) {
 	   this.width = width;
 	   this.height = height;
-	   this.centerRadius = centerRadius;
 		tiles = new Tile[width][height];
 		
 		for(int y = 0; y < height; y++) {
@@ -29,40 +28,11 @@ public class Maze {
 				tiles[x][y] = new Tile(this, x, y);
 			}
 		}
-		
-		markCenter();
-		drawStartingPositions();
 	}
 	
-	public Maze(int width, int height, int centerRadius, long randomSeed) {
-		this(width, height, centerRadius);
+	public Maze(int width, int height, long randomSeed) {
+		this(width, height);
 		random.setSeed(randomSeed);
-	}
-	
-	private void markCenter() {
-		String centerBlueprint = "XX11111XX.X1111111X.111111111.111111111.111111111.111111111.111111111.X1111111X.XX11111XX";
-		StructureSlot centerSlot = new StructureSlot(this, centerBlueprint);
-		int radius = (centerSlot.getWidth() / 2);
-		Point center = getCenterPoint();
-		Point corner = new Point(center.x - radius, center.y - radius);
-		
-		centerSlot.setLocation(corner);
-		centerSlot.markStructureTiles();
-		structures.add(centerSlot);
-		centerStrucSlot = centerSlot;
-	}
-	
-	private void drawStartingPositions() {
-		String blueprintString = "00000.01110.01110.01110.01110";
-		StructureSlot startingSlot = new StructureSlot(this, blueprintString, -random.nextInt(2));
-		StructureSlot mirrorSlot = startingSlot.getMirrorSlot();
-		
-		startingSlot.markStructureTiles();
-		mirrorSlot.markStructureTiles();
-		startingSlot.drawStructureTiles();
-		mirrorSlot.drawStructureTiles();
-		structures.add(startingSlot);
-		structures.add(mirrorSlot);
 	}
 	
 	public int getWidth() {
@@ -258,6 +228,7 @@ public class Maze {
 				currentPoint = path.pop();
 			}
 		}
+		
 	}
 	
 	public void knockDownWalls(float openWallPercentage) {
@@ -283,7 +254,32 @@ public class Maze {
 		}
 	}
 	
-	public void openUpCenter() {
-		centerStrucSlot.drawStructureTiles();
+	public void markCenter() {
+		String centerBlueprint = "XX11111XX.X1111111X.111111111.111111111.111111111.111111111.111111111.X1111111X.XX11111XX";
+		centerSlot = new StructureSlot(this, centerBlueprint);
+		int radius = (centerSlot.getWidth() / 2);
+		Point center = getCenterPoint();
+		Point corner = new Point(center.x - radius, center.y - radius);
+		
+		centerSlot.setLocation(corner);
+		centerSlot.markStructureTiles();
+		structures.add(centerSlot);
+	}
+	
+	public void drawStartingPositions() {
+		String blueprintString = "00000.01110.01110.01110.01110";
+		StructureSlot startingSlot = new StructureSlot(this, blueprintString, -random.nextInt(2));
+		StructureSlot mirrorSlot = startingSlot.getMirrorSlot();
+		
+		startingSlot.markStructureTiles();
+		mirrorSlot.markStructureTiles();
+		startingSlot.drawStructureTiles();
+		mirrorSlot.drawStructureTiles();
+		structures.add(startingSlot);
+		structures.add(mirrorSlot);
+	}
+	
+	public void drawCenter() {
+		centerSlot.drawStructureTiles();
 	}
 }
