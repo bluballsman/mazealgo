@@ -46,7 +46,7 @@ public class MazeCanvas extends Canvas {
 				Tile t = maze.getTile(x, y);
 				Color color = t.isGround() ? new Color(255, 255, 255) : new Color(0, 0, 0);
 				if(t.isStructure()) {
-					color = t.isGround() ? new Color(220, 223, 230) : new Color(105, 107, 112);
+					//color = t.isGround() ? new Color(220, 223, 230) : new Color(105, 107, 112);
 				}
 				
 				g.setColor(color);

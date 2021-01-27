@@ -12,7 +12,6 @@ import com.gmail.bluballsman.mazealgo.tile.Tile;
 public class Maze {
 	protected int width;
 	protected int height;
-	protected int centerRadius;
 	protected Tile[][] tiles;
 	protected ArrayList<StructureSlot> structures = new ArrayList<StructureSlot>();
 	protected StructureSlot centerSlot;
@@ -41,10 +40,6 @@ public class Maze {
 	
 	public int getHeight() {
 		return height;
-	}
-	
-	public int getCenterRadius() {
-		return centerRadius;
 	}
 	
 	public Point getCenterPoint() {
