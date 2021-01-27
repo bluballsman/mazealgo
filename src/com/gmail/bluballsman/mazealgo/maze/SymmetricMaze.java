@@ -2,9 +2,7 @@ package com.gmail.bluballsman.mazealgo.maze;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Stack;
 
-import com.gmail.bluballsman.mazealgo.loc.Direction;
 import com.gmail.bluballsman.mazealgo.structure.StructureSlot;
 
 public class SymmetricMaze extends Maze {
@@ -17,24 +15,18 @@ public class SymmetricMaze extends Maze {
 		super(width, height, randomSeed);
 	}
 	
-	public void setGroundSymmetric(int x, int y, boolean isGround) {
+	@Override
+	public void setGround(int x, int y, boolean isGround) {
 		Point mirror = getMirrorPoint(x, y);
-		setGround(x, y, isGround);
-		setGround(mirror, isGround);
+		super.setGround(x, y, isGround);
+		super.setGround(mirror.x, mirror.y, isGround);
 	}
 	
-	public void setGroundSymmetric(Point p, boolean isGround) {
-		setGroundSymmetric(p.x, p.y, isGround);
-	}
-	
-	public void setStructureFlagSymmetric(int x, int y, boolean structureFlag) {
+	@Override
+	public void setStructureFlag(int x, int y, boolean structureFlag) {
 		Point mirror = getMirrorPoint(x, y);
-		setStructureFlag(x, y, structureFlag);
-		setStructureFlag(mirror, structureFlag);
-	}
-	
-	public void setStructureFlagSymmetric(Point p, boolean structureFlag) {
-		setStructureFlagSymmetric(p.x, p.y, structureFlag);
+		super.setStructureFlag(x, y, structureFlag);
+		super.setStructureFlag(mirror.x, mirror.y, structureFlag);
 	}
 	
 	@Override
@@ -45,6 +37,10 @@ public class SymmetricMaze extends Maze {
 		
 		for(int rotations = 0; rotations < 4; rotations++) {
 			s.rotate(1);
+			
+			// Because the maze is symmetrical, we only need to look at half of it in order to check if the structure fits.
+			// Since the maze is symmetrical until the center point, we need to do 2 loops: one that goes until right before
+			// the center line and one that does the center line but only until halfway
 			for(int y = 0; y < centerPoint.y; y++) {
 				for(int x = 0; x < width - s.getWidth(); x++) {
 					s.setLocation(x, y);
@@ -55,7 +51,7 @@ public class SymmetricMaze extends Maze {
 					}
 				}
 			}
-			
+			// Doing the center line
 			for(int x = 0; x <= centerPoint.x; x++) {
 				s.setLocation(x, centerPoint.y);
 				
@@ -98,50 +94,11 @@ public class SymmetricMaze extends Maze {
 	}
 	
 	@Override
-	public void fillMaze() {
-		Point currentPoint = freeRandomOddPoint(1, 1, width - 1, height - 1);
-		Stack<Point> path = new Stack<Point>();
-		path.push(currentPoint);
-		setGroundSymmetric(currentPoint, true);
-		
-		while(!path.isEmpty()) {
-			ArrayList<Direction> availableDirections = new ArrayList<Direction>();
-			
-			if(!isGround(currentPoint.x, currentPoint.y + 2)) {
-				availableDirections.add(Direction.NORTH);
-			}
-			if(!isGround(currentPoint.x + 2, currentPoint.y)) {
-				availableDirections.add(Direction.EAST);
-			}
-			if(!isGround(currentPoint.x, currentPoint.y - 2)) {
-				availableDirections.add(Direction.SOUTH);
-			}
-			if(!isGround(currentPoint.x - 2, currentPoint.y)) {
-				availableDirections.add(Direction.WEST);
-			}
-			
-			if(!availableDirections.isEmpty()) {
-				Direction chosenDirection = availableDirections.get(random.nextInt(availableDirections.size()));
-				
-				currentPoint.translate(chosenDirection.X_OFFSET, chosenDirection.Y_OFFSET);
-				setGroundSymmetric(currentPoint, true);
-				currentPoint.translate(chosenDirection.X_OFFSET, chosenDirection.Y_OFFSET);
-				setGroundSymmetric(currentPoint, true);
-				path.push(new Point(currentPoint));
-			}
-			else {
-				currentPoint = path.pop();
-			}
-		}
-	}
-	
-	@Override
 	public void knockDownWalls(float openWallPercentage) {
 		Point centerPoint = getCenterPoint();
 		ArrayList<Point> availableWalls = new ArrayList<Point>();
 		
-		// Adding all the walls to knock down above the center line. This is because we are only counting half of the points
-		// So we're going to only half of the center line on the next loop
+		// Repeating the process from findMatches() but this time to knock down walls
 		for(int y = 1; y < centerPoint.y; y++) {
 			for(int x = 1 + y % 2; x < width - 1; x+=2) {
 				if(!isGround(x, y) && !isStructure(x, y)) {
@@ -160,11 +117,9 @@ public class SymmetricMaze extends Maze {
 		int wallsToDestroy = Math.round(availableWalls.size() * openWallPercentage);
 		for(int i = 0; i < wallsToDestroy; i++) {
 			Point randomWall = availableWalls.get(random.nextInt(availableWalls.size()));
-			Point mirrorWall = getMirrorPoint(randomWall);
 			
 			availableWalls.remove(randomWall);
 			setGround(randomWall, true);
-			setGround(mirrorWall, true);
 		}
 	}
 	
@@ -172,6 +127,7 @@ public class SymmetricMaze extends Maze {
 		excavateRoom("0001000.0111110.0111110.0111110.0000000");
 		excavateRoom("00000.01110.01110.01110.01000");
 		excavateRoom("0000010.0111110.0111110.0111110.0100000");
+		excavateRoom("00000.01110.01110.01110.01110");
 	}
 	
 	public void testStructures() {

@@ -209,12 +209,13 @@ public class StructureSlot {
 			for(int x = 0; x < width; x++) {
 				BlueprintCharacter bc = blueprint[x][y];
 				Point p = new Point(x + this.x, y + this.y);
+				Tile t = maze.getTile(p);
 				
 				if(bc == BlueprintCharacter.WALL) {
-					maze.setGround(p, false);
+					t.setGround(false);
 				}
 				else if(bc == BlueprintCharacter.GROUND) {
-					maze.setGround(p, true);
+					t.setGround(true);
 				}
 			}
 		}

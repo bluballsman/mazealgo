@@ -58,6 +58,10 @@ public class Tile {
 		this.structureFlag = structureFlag;
 	}
 	
+	// Returns the "type code" for this tile. The type code is a representation of the surrounding tiles on the north, east, south, and west sides
+	// of this tile. If a surrounding tile match this tile's ground flag, it is represented as a "1", otherwise as "0". 
+	// These bits are represented in the type code from left to right as north, east, south, west. So a type code of 1010 means that the ground flag
+	// of the surrounding tiles matched this tile in the north and south positions. Out of bounds tiles are counted as ground.
 	private int getTypeCode() {
 		Tile north = maze.getTile(x, y + 1);
 		Tile east = maze.getTile(x + 1, y);
@@ -89,6 +93,8 @@ public class Tile {
 		static HashMap<Integer, Type> codeMap = new HashMap<Integer, Type>();
 		static HashMap<Integer, Integer> rotationMap = new HashMap<Integer, Integer>();
 		
+		// Setting up the default type codes for each of the tile types. All rotations from this type code
+		// are stored in a separate map for easy access. 
 		static {
 			for(Type type: values()) {
 				int dummyCode = type.typeCode + (type.typeCode << 4);
