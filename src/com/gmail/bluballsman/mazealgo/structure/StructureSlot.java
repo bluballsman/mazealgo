@@ -199,7 +199,7 @@ public class StructureSlot {
 	public void markStructureTiles() {
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				Tile t = maze.getTile(x, y);
+				Tile t = maze.getTile(x + getX(), y + getY());
 				
 				t.setStructureFlag(true);
 			}
